@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat - Работает везде</title>
+    <title>AI Chat - Работает</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -113,9 +113,9 @@
 </head>
 <body>
     <div class="chat">
-        <div class="header">🤖 Groq AI Assistant</div>
+        <div class="header">🤖 Groq AI Assistant (Llama 3)</div>
         <div class="messages" id="messages">
-            <div class="message ai">Привет! Я работаю на Groq AI. Напиши сообщение!</div>
+            <div class="message ai">Привет! Я работаю на Groq AI (Llama 3). Напиши сообщение!</div>
         </div>
         <div class="input-area">
             <input type="text" id="userInput" placeholder="Напиши сообщение..." onkeypress="if(event.key === 'Enter') sendMessage()">
@@ -127,6 +127,9 @@
     <script>
         // ТВОЙ API КЛЮЧ
         const API_KEY = "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";
+        
+        // ИСПРАВЛЕНО: Используем актуальную модель
+        const MODEL = "llama3-70b-8192";  // или "llama3-8b-8192", "llama-3.3-70b-versatile"
         
         const messagesDiv = document.getElementById('messages');
         const inputField = document.getElementById('userInput');
@@ -160,7 +163,6 @@
             setStatus('🔄 Отправка запроса к Groq...');
 
             try {
-                // Прямой запрос к Groq API (может сработать если залить на GitHub Pages)
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -168,7 +170,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: "mixtral-8x7b-32768",
+                        model: MODEL,  // ← Исправлено!
                         messages: [
                             {
                                 role: "system",
@@ -204,13 +206,13 @@
                 
                 let errorMsg = '';
                 if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
-                    errorMsg = '⚠️ GitHub Pages блокирует прямые запросы.\n\n📌 РЕШЕНИЕ:\n1. Скачай этот файл на компьютер\n2. Открой в браузере Brave\nили\n3. Установи расширение "Allow CORS" в Chrome\n\nИли используй этот же код на Netlify/Vercel';
+                    errorMsg = '⚠️ Проблема с соединением.\n\n📌 РЕШЕНИЕ:\n• Используй браузер Brave\n• Или установи расширение "Allow CORS" в Chrome\n• Или залей этот файл на Netlify';
                 } else {
                     errorMsg = `❌ Ошибка: ${error.message}`;
                 }
                 
                 addMessage(errorMsg, 'ai');
-                setStatus('⚠️ Ошибка соединения', true);
+                setStatus('⚠️ Ошибка', true);
             } finally {
                 isWaiting = false;
                 sendBtn.disabled = false;
