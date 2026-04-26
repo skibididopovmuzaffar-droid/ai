@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MUZAFFAR AI - Google Gemini</title>
     <style>
-        /* ПЕРЕМЕННЫЕ ДЛЯ НАСТРОЙКИ ДИЗАЙНА */
         :root {
             --bg-primary: #1a1a2e;
             --bg-secondary: #16213e;
@@ -40,7 +39,6 @@
             box-shadow: 0 25px 50px rgba(0,0,0,0.3);
         }
 
-        /* Боковая панель */
         .sidebar {
             width: 280px;
             background: rgba(0, 0, 0, 0.3);
@@ -130,7 +128,6 @@
             opacity: 1;
         }
 
-        /* Основной чат */
         .main-chat {
             flex: 1;
             display: flex;
@@ -162,6 +159,9 @@
             padding: 12px 18px;
             border-radius: 20px;
             animation: fadeIn 0.3s ease;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         @keyframes fadeIn {
@@ -183,7 +183,6 @@
             border-bottom-left-radius: 5px;
         }
 
-        /* Поле ввода */
         .input-area {
             padding: 20px;
             background: rgba(0,0,0,0.3);
@@ -264,8 +263,8 @@
         </div>
         <div class="main-chat">
             <div class="chat-header">
-                <h1>🤖 MUZAFFAR AI (Google Gemini)</h1>
-                <p style="color: #888; font-size: 0.85em;">Мощный AI с русским языком | Без CORS через Netlify</p>
+                <h1>🤖 MUZAFFAR AI (Google Gemini 1.5 Flash)</h1>
+                <p style="color: #888; font-size: 0.85em;">Мощный AI с русским языком | Работает без CORS на Netlify</p>
             </div>
             <div class="messages" id="messages"></div>
             <div class="input-area">
@@ -279,11 +278,10 @@
 
     <script>
         // ===== КОНФИГУРАЦИЯ =====
-        // ТВОЙ GOOGLE GEMINI API КЛЮЧ
         const GEMINI_API_KEY = "AIzaSyD_D_ekxQMOnTpUIVO9746G8RRCxvyYAYc";
-        const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+        // ИСПРАВЛЕННЫЙ URL - убрали v1beta
+        const GEMINI_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
         
-        // Хранилище чатов
         let chats = [];
         let currentChatId = null;
         let isSending = false;
@@ -313,7 +311,7 @@
                 title: `Новый чат ${chats.length + 1}`,
                 date: new Date().toLocaleString(),
                 messages: [
-                    { role: 'ai', content: 'Привет! Я MUZAFFAR AI на базе Google Gemini. Задай любой вопрос на русском! 🚀', timestamp: new Date().toLocaleTimeString() }
+                    { role: 'ai', content: 'Привет! Я MUZAFFAR AI на базе Google Gemini 1.5 Flash. Задай любой вопрос на русском! 🚀', timestamp: new Date().toLocaleTimeString() }
                 ]
             };
             chats.unshift(newChat);
@@ -406,10 +404,8 @@
             input.value = '';
             document.getElementById('sendBtn').disabled = true;
             
-            // Добавляем сообщение пользователя
             addMessageToChat(text, 'user');
             
-            // Индикатор печати
             const container = document.getElementById('messages');
             const typingDiv = document.createElement('div');
             typingDiv.className = 'typing';
@@ -419,25 +415,26 @@
             container.scrollTop = container.scrollHeight;
             
             try {
-                // Формируем историю для Gemini
-                const chat = chats.find(c => c.id === currentChatId);
-                const history = chat.messages.filter(m => m.role !== 'ai' || m.content !== '✍️ MUZAFFAR AI печатает...').map(m => ({
-                    role: m.role === 'user' ? 'user' : 'model',
-                    parts: [{ text: m.content }]
-                }));
+                // Формируем контент для Gemini
+                const contents = [
+                    {
+                        role: "user",
+                        parts: [{ text: text }]
+                    }
+                ];
                 
-                // Запрос к Gemini API
                 const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        contents: history,
+                        contents: contents,
                         generationConfig: {
                             temperature: 0.7,
                             maxOutputTokens: 800,
-                            topP: 0.95
+                            topP: 0.9,
+                            topK: 40
                         }
                     })
                 });
@@ -445,23 +442,30 @@
                 typingDiv.remove();
                 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error?.message || `HTTP ${response.status}`);
+                    const errorData = await response.json();
+                    console.error('Gemini API Error:', errorData);
+                    throw new Error(errorData.error?.message || `HTTP ${response.status}`);
                 }
                 
                 const data = await response.json();
-                const reply = data.candidates[0].content.parts[0].text;
                 
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error('Неожиданный ответ от Gemini API');
+                }
+                
+                const reply = data.candidates[0].content.parts[0].text;
                 addMessageToChat(reply, 'ai');
                 
             } catch (error) {
                 typingDiv.remove();
                 console.error('Gemini Error:', error);
                 let errorMsg = `❌ Ошибка: ${error.message}`;
-                if (error.message.includes('API key')) {
-                    errorMsg = '❌ Неверный API ключ. Проверь ключ Gemini.';
+                if (error.message.includes('API key') || error.message.includes('quota')) {
+                    errorMsg = '❌ Проблема с API ключом. Проверь ключ Gemini или лимиты.';
                 } else if (error.message.includes('fetch')) {
-                    errorMsg = '❌ Ошибка соединения. Залей этот файл на Netlify - там CORS не будет!';
+                    errorMsg = '❌ Ошибка соединения. Залей этот файл на Netlify - там CORS не будет проблем!';
+                } else if (error.message.includes('not found')) {
+                    errorMsg = '❌ Модель не найдена. Использую gemini-1.5-flash.';
                 }
                 addMessageToChat(errorMsg, 'ai');
             } finally {
