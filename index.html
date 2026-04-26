@@ -5,14 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MUZAFFAR AI - Google Gemini 2.0</title>
     <style>
+        /* ===== НАСТРОЙКИ ДИЗАЙНА - МЕНЯЙ ПОД СЕБЯ ===== */
         :root {
             --bg-primary: #0f0c29;
             --bg-secondary: #1a1a2e;
+            --bg-sidebar: rgba(0, 0, 0, 0.4);
             --accent-primary: #ff6b35;
             --accent-secondary: #f7b733;
             --user-msg-bg: linear-gradient(135deg, #ff6b35, #f7b733);
-            --ai-msg-bg: rgba(255,255,255,0.08);
+            --ai-msg-bg: rgba(255, 255, 255, 0.08);
+            --text-light: #ffffff;
+            --text-gray: #aaaaaa;
+            --border-color: rgba(255, 255, 255, 0.1);
             --border-radius: 28px;
+            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         * {
@@ -22,32 +28,34 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: var(--font-main);
             background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
+        /* Контейнер чата */
         .chat-container {
             max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(12px);
             border-radius: var(--border-radius);
             height: 90vh;
             display: flex;
             overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
         }
 
+        /* ===== БОКОВАЯ ПАНЕЛЬ (ИСТОРИЯ ЧАТОВ) ===== */
         .sidebar {
             width: 300px;
-            background: rgba(0,0,0,0.4);
+            background: var(--bg-sidebar);
             padding: 20px;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255,255,255,0.08);
+            border-right: 1px solid var(--border-color);
         }
 
         .logo {
@@ -77,11 +85,11 @@
 
         .new-chat-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255,107,53,0.3);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
         }
 
         .chat-history-title {
-            color: #888;
+            color: var(--text-gray);
             font-size: 0.75em;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -97,7 +105,7 @@
         }
 
         .chat-item {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             padding: 12px;
             border-radius: 12px;
             cursor: pointer;
@@ -106,16 +114,16 @@
         }
 
         .chat-item:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .chat-item.active {
-            background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(247,183,51,0.2));
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(247, 183, 51, 0.2));
             border-left: 3px solid var(--accent-primary);
         }
 
         .chat-item-title {
-            color: white;
+            color: var(--text-light);
             font-size: 0.9em;
             font-weight: 500;
             overflow: hidden;
@@ -125,7 +133,7 @@
         }
 
         .chat-item-date {
-            color: #888;
+            color: var(--text-gray);
             font-size: 0.7em;
             margin-top: 4px;
         }
@@ -135,7 +143,7 @@
             right: 8px;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255,50,50,0.6);
+            background: rgba(255, 50, 50, 0.6);
             border: none;
             border-radius: 6px;
             padding: 4px 8px;
@@ -151,9 +159,10 @@
         }
 
         .delete-chat:hover {
-            background: rgba(255,50,50,1);
+            background: rgba(255, 50, 50, 1);
         }
 
+        /* ===== ОСНОВНАЯ ОБЛАСТЬ ===== */
         .main-chat {
             flex: 1;
             display: flex;
@@ -163,8 +172,8 @@
 
         .chat-header {
             padding: 20px 25px;
-            background: rgba(0,0,0,0.3);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .chat-header h1 {
@@ -176,11 +185,12 @@
         }
 
         .chat-header p {
-            color: #888;
+            color: var(--text-gray);
             font-size: 0.8em;
             margin-top: 5px;
         }
 
+        /* ===== СООБЩЕНИЯ ===== */
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -198,11 +208,18 @@
             line-height: 1.5;
             white-space: pre-wrap;
             word-wrap: break-word;
+            position: relative;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .user-message {
@@ -217,13 +234,67 @@
             color: #e0e0e0;
             align-self: flex-start;
             border-bottom-left-radius: 5px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
         }
 
+        /* Кнопки действий над сообщением */
+        .message-actions {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .message-wrapper:hover .message-actions {
+            opacity: 1;
+        }
+
+        .message-actions button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85em;
+            padding: 4px 8px;
+            border-radius: 5px;
+        }
+
+        .message-actions button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .edit-btn { color: #ffc107; }
+        .copy-btn { color: #17a2b8; }
+
+        .message-time {
+            font-size: 0.7em;
+            margin-top: 6px;
+            opacity: 0.6;
+        }
+
+        /* Индикатор печати */
+        .typing {
+            background: var(--ai-msg-bg);
+            padding: 10px 18px;
+            border-radius: 20px;
+            align-self: flex-start;
+            color: var(--text-gray);
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ===== ПОЛЕ ВВОДА ===== */
         .input-area {
             padding: 20px 25px;
-            background: rgba(0,0,0,0.3);
-            border-top: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid var(--border-color);
         }
 
         .input-wrapper {
@@ -234,9 +305,9 @@
         input {
             flex: 1;
             padding: 14px 22px;
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 2px solid var(--border-color);
             border-radius: 40px;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
             color: white;
             font-size: 1em;
             outline: none;
@@ -245,7 +316,7 @@
 
         input:focus {
             border-color: var(--accent-primary);
-            background: rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
         }
 
         input::placeholder {
@@ -265,7 +336,7 @@
 
         button:hover:not(:disabled) {
             transform: scale(1.02);
-            box-shadow: 0 5px 20px rgba(255,107,53,0.3);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
         }
 
         button:disabled {
@@ -273,21 +344,12 @@
             cursor: not-allowed;
         }
 
-        .typing {
-            background: var(--ai-msg-bg);
-            padding: 10px 18px;
-            border-radius: 20px;
-            align-self: flex-start;
-            color: #aaa;
-            font-size: 0.9em;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
+        /* ===== ДРУГОЕ ===== */
         .toast {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
             color: white;
             padding: 12px 20px;
@@ -298,8 +360,14 @@
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         ::-webkit-scrollbar {
@@ -307,7 +375,7 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -316,24 +384,33 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .message { max-width: 88%; }
-            .chat-header h1 { font-size: 1.2em; }
+            .sidebar {
+                display: none;
+            }
+            .message {
+                max-width: 88%;
+            }
+            .chat-header h1 {
+                font-size: 1.2em;
+            }
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
+        <!-- Боковая панель с историей -->
         <div class="sidebar">
             <div class="logo">MUZAFFAR AI</div>
             <button class="new-chat-btn" onclick="createNewChat()">✨ Новый чат</button>
             <div class="chat-history-title">ИСТОРИЯ ЧАТОВ</div>
             <div class="chat-list" id="chatList"></div>
         </div>
+
+        <!-- Основная область чата -->
         <div class="main-chat">
             <div class="chat-header">
                 <h1>🤖 MUZAFFAR AI</h1>
-                <p>Google Gemini 2.0 Flash | Быстрый и умный AI | Работает без CORS</p>
+                <p>Google Gemini 2.0 Flash | Мощный AI с русским языком | Работает на Netlify</p>
             </div>
             <div class="messages" id="messages"></div>
             <div class="input-area">
@@ -346,24 +423,28 @@
     </div>
 
     <script>
-        // ===== КОНФИГУРАЦИЯ =====
-        const GEMINI_API_KEY = "AIzaSyD_D_ekxQMOnTpUIVO9746G8RRCxvyYAYc";
-        // ИСПОЛЬЗУЕМ РАБОЧУЮ МОДЕЛЬ - GEMINI 2.0 FLASH
+        // ============================================================
+        // НАСТРОЙКИ - ТВОЙ НОВЫЙ API КЛЮЧ
+        // ============================================================
+        const GEMINI_API_KEY = "AIzaSyDAwUkpfWvcEc-DHppuiL3l7f75UsxY6vM";
         const MODEL_NAME = "gemini-2.0-flash-exp";
         const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
         
+        // Переменные приложения
         let chats = [];
         let currentChatId = null;
         let isSending = false;
         
-        // ===== ЗАГРУЗКА И СОХРАНЕНИЕ =====
+        // ============================================================
+        // УПРАВЛЕНИЕ ЧАТАМИ (сохранение в localStorage)
+        // ============================================================
         function loadChats() {
             try {
-                const saved = localStorage.getItem('muzaffar_gemini_v2_chats');
+                const saved = localStorage.getItem('muzaffar_ai_chats');
                 if (saved) {
                     chats = JSON.parse(saved);
                 }
-            } catch(e) { console.error('Load error:', e); }
+            } catch(e) { console.error('Ошибка загрузки:', e); }
             
             if (!chats || chats.length === 0) {
                 createNewChat();
@@ -376,17 +457,23 @@
         
         function saveChats() {
             try {
-                localStorage.setItem('muzaffar_gemini_v2_chats', JSON.stringify(chats));
-            } catch(e) { console.error('Save error:', e); }
+                localStorage.setItem('muzaffar_ai_chats', JSON.stringify(chats));
+            } catch(e) { console.error('Ошибка сохранения:', e); }
         }
         
         function createNewChat() {
             const newChat = {
                 id: Date.now(),
                 title: `Новый чат ${chats.length + 1}`,
-                date: new Date().toLocaleString(),
+                date: new Date().toLocaleString('ru-RU'),
                 messages: [
-                    { role: 'ai', content: 'Привет! Я MUZAFFAR AI на Google Gemini 2.0. Задай вопрос на русском! 🚀', timestamp: new Date().toLocaleTimeString() }
+                    { 
+                        id: Date.now(),
+                        role: 'ai', 
+                        content: 'Привет! Я MUZAFFAR AI на Google Gemini 2.0. Задай любой вопрос на русском! 🚀', 
+                        timestamp: new Date().toLocaleTimeString('ru-RU'),
+                        editable: false
+                    }
                 ]
             };
             chats.unshift(newChat);
@@ -420,18 +507,56 @@
             const container = document.getElementById('messages');
             container.innerHTML = '';
             chat.messages.forEach(msg => {
-                renderMessage(msg.content, msg.role);
+                renderMessage(msg.content, msg.role, msg.timestamp, msg.id);
             });
             renderChatList();
         }
         
-        function renderMessage(content, role) {
+        // ============================================================
+        // ОТОБРАЖЕНИЕ СООБЩЕНИЙ
+        // ============================================================
+        function renderMessage(content, role, timestamp = null, msgId = null) {
             const container = document.getElementById('messages');
-            const div = document.createElement('div');
-            div.className = `message ${role === 'user' ? 'user-message' : 'ai-message'}`;
-            div.innerText = content;
-            container.appendChild(div);
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper`;
+            const time = timestamp || new Date().toLocaleTimeString('ru-RU');
+            const id = msgId || Date.now();
+            
+            wrapper.innerHTML = `
+                <div class="message ${role === 'user' ? 'user-message' : 'ai-message'}">
+                    ${escapeHtml(content)}
+                    <div class="message-time">${time}</div>
+                    <div class="message-actions">
+                        ${role === 'user' ? `<button class="edit-btn" onclick="editMessage(${id})">✏️</button>` : ''}
+                        <button class="copy-btn" onclick="copyMessage('${escapeHtml(content).replace(/'/g, "\\'")}')">📋</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(wrapper);
             container.scrollTop = container.scrollHeight;
+        }
+        
+        function addMessageToChat(content, role, msgId = null) {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat) {
+                const newMsg = {
+                    id: msgId || Date.now(),
+                    role: role,
+                    content: content,
+                    timestamp: new Date().toLocaleTimeString('ru-RU'),
+                    editable: role === 'user'
+                };
+                chat.messages.push(newMsg);
+                
+                // Обновляем заголовок чата (по первому сообщению пользователя)
+                if (chat.messages.length === 2 && role === 'user') {
+                    chat.title = content.substring(0, 30) + (content.length > 30 ? '...' : '');
+                    chat.date = new Date().toLocaleString('ru-RU');
+                }
+                saveChats();
+                renderChatList();
+                renderMessage(content, role, newMsg.timestamp, newMsg.id);
+            }
         }
         
         function renderChatList() {
@@ -450,37 +575,51 @@
             });
         }
         
-        function addMessageToChat(content, role) {
+        // ============================================================
+        // РЕДАКТИРОВАНИЕ И КОПИРОВАНИЕ СООБЩЕНИЙ
+        // ============================================================
+        function editMessage(msgId) {
             const chat = chats.find(c => c.id === currentChatId);
-            if (chat) {
-                chat.messages.push({
-                    role: role,
-                    content: content,
-                    timestamp: new Date().toLocaleTimeString()
-                });
-                if (chat.messages.length === 2 && role === 'user') {
-                    chat.title = content.substring(0, 30) + (content.length > 30 ? '...' : '');
-                }
+            const msgIndex = chat.messages.findIndex(m => m.id === msgId);
+            if (msgIndex === -1 || chat.messages[msgIndex].role !== 'user') return;
+            
+            const newContent = prompt('Редактировать сообщение:', chat.messages[msgIndex].content);
+            if (newContent && newContent.trim() && newContent !== chat.messages[msgIndex].content) {
+                // Обновляем сообщение
+                chat.messages[msgIndex].content = newContent;
+                // Удаляем все следующие сообщения (ответы AI)
+                chat.messages = chat.messages.slice(0, msgIndex + 1);
                 saveChats();
-                renderMessage(content, role);
-                renderChatList();
+                loadChat(currentChatId);
+                // Отправляем новое сообщение
+                sendMessageWithText(newContent);
             }
         }
         
-        // ===== ОТПРАВКА СООБЩЕНИЯ В GEMINI 2.0 =====
+        function copyMessage(text) {
+            navigator.clipboard.writeText(text);
+            showToast('📋 Сообщение скопировано');
+        }
+        
+        // ============================================================
+        // ОТПРАВКА СООБЩЕНИЙ В GOOGLE GEMINI
+        // ============================================================
         async function sendMessage() {
-            if (isSending) return;
-            
             const input = document.getElementById('userInput');
             const text = input.value.trim();
-            if (!text) return;
-            
-            isSending = true;
+            if (!text || isSending) return;
+            await sendMessageWithText(text);
             input.value = '';
+        }
+        
+        async function sendMessageWithText(text) {
+            if (isSending) return;
+            isSending = true;
             document.getElementById('sendBtn').disabled = true;
             
             addMessageToChat(text, 'user');
             
+            // Показываем индикатор печати
             const container = document.getElementById('messages');
             const typingDiv = document.createElement('div');
             typingDiv.className = 'typing';
@@ -500,7 +639,8 @@
                     generationConfig: {
                         temperature: 0.8,
                         maxOutputTokens: 1000,
-                        topP: 0.95
+                        topP: 0.95,
+                        topK: 40
                     },
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -510,14 +650,9 @@
                     ]
                 };
                 
-                console.log('Sending request to:', GEMINI_URL);
-                console.log('Using model:', MODEL_NAME);
-                
                 const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
                 
@@ -530,7 +665,6 @@
                 }
                 
                 const data = await response.json();
-                console.log('Response:', data);
                 
                 if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
                     throw new Error('Пустой ответ от API');
@@ -544,23 +678,25 @@
                 console.error('Error:', error);
                 
                 let errorMsg = `❌ ${error.message}`;
-                if (error.message.includes('API key') || error.message.includes('quota') || error.message.includes('not found')) {
-                    errorMsg = `❌ Модель ${MODEL_NAME} недоступна. Пробуем gemini-1.5-flash...`;
-                    // Пробуем другую модель
-                    await tryAlternativeModel(text);
-                    return;
+                if (error.message.includes('API key') || error.message.includes('quota')) {
+                    errorMsg = '❌ Проблема с API ключом. Проверь ключ в Google AI Studio.';
                 } else if (error.message.includes('fetch')) {
                     errorMsg = '❌ Ошибка соединения. Залей этот файл на Netlify - там CORS не будет!';
+                } else if (error.message.includes('not found')) {
+                    errorMsg = '❌ Модель временно недоступна. Пробуем gemini-1.5-flash...';
+                    // Пробуем альтернативную модель
+                    await tryAlternativeModel(text);
+                    return;
                 }
                 addMessageToChat(errorMsg, 'ai');
             } finally {
                 isSending = false;
                 document.getElementById('sendBtn').disabled = false;
-                input.focus();
+                document.getElementById('userInput').focus();
             }
         }
         
-        // Запасная модель
+        // Альтернативная модель на случай ошибки
         async function tryAlternativeModel(text) {
             const altModel = "gemini-1.5-flash";
             const altUrl = `https://generativelanguage.googleapis.com/v1beta/models/${altModel}:generateContent`;
@@ -584,6 +720,9 @@
             }
         }
         
+        // ============================================================
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================================================
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -598,7 +737,9 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
-        // Инициализация
+        // ============================================================
+        // ЗАПУСК
+        // ============================================================
         loadChats();
     </script>
 </body>
