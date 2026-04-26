@@ -3,245 +3,633 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat - Работает</title>
+    <title>✨ AI Assistant Pro | Groq + Gemini</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .chat {
-            width: 100%;
-            max-width: 700px;
-            height: 85vh;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at 20% 50%, #0a0a2a, #000000);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Анимированный фон */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(0, 255, 136, 0.1) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Основной контейнер */
+        .app {
+            position: relative;
+            z-index: 1;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Сайдбар */
+        .sidebar {
+            width: 320px;
+            background: rgba(10, 10, 30, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ff88, #00bfff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .new-chat-btn {
+            background: linear-gradient(135deg, #00ff88, #00bfff);
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            color: #0a0a2a;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .history-title {
+            color: #888;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        .chat-item.active {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 191, 255, 0.15));
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .chat-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            font-size: 0.9em;
+        }
+
+        .chat-date {
+            font-size: 0.7em;
+            color: #666;
+        }
+
+        .api-status-card {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            text-align: center;
+            border-left: 3px solid;
+        }
+
+        .api-status-card.groq { border-left-color: #00ff88; color: #00ff88; }
+        .api-status-card.gemini { border-left-color: #ffd700; color: #ffd700; }
+        .api-status-card.error { border-left-color: #ff4444; color: #ff8888; }
+
+        /* Основной чат */
+        .main-chat {
+            flex: 1;
+            background: rgba(10, 10, 30, 0.5);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .header {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            text-align: center;
+
+        .chat-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-header h1 {
             font-size: 1.5em;
-            font-weight: bold;
-            color: #00ff88;
+            background: linear-gradient(135deg, #fff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
+
+        .chat-header p {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+
+        /* Сообщения */
         .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 24px 32px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
         }
+
         .message {
-            max-width: 75%;
-            padding: 12px 18px;
-            border-radius: 20px;
-            animation: fadeIn 0.3s ease;
-            line-height: 1.4;
+            display: flex;
+            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
-        .user {
-            background: #007bff;
+
+        .message.user { justify-content: flex-end; }
+        .message.ai { justify-content: flex-start; }
+
+        .bubble {
+            max-width: 70%;
+            padding: 14px 22px;
+            border-radius: 24px;
+            line-height: 1.5;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .user .bubble {
+            background: linear-gradient(135deg, #007bff, #00bfff);
             color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 5px;
+            border-bottom-right-radius: 6px;
         }
-        .ai {
-            background: rgba(255,255,255,0.9);
-            color: #1a1a2e;
-            align-self: flex-start;
-            border-bottom-left-radius: 5px;
-            white-space: pre-wrap;
+
+        .ai .bubble {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-bottom-left-radius: 6px;
+            backdrop-filter: blur(10px);
         }
+
+        .time {
+            font-size: 0.65em;
+            margin-top: 6px;
+            opacity: 0.6;
+        }
+
+        /* Индикатор печати */
         .typing {
-            background: rgba(255,255,255,0.9);
-            color: #666;
-            align-self: flex-start;
-            padding: 12px 18px;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 14px 22px;
+            border-radius: 24px;
+            display: inline-flex;
+            gap: 6px;
+            backdrop-filter: blur(10px);
         }
+
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: typingAnim 1.4s infinite;
+        }
+
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingAnim {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        /* Ввод */
         .input-area {
-            padding: 20px;
-            background: rgba(0,0,0,0.3);
+            padding: 20px 32px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             gap: 12px;
         }
-        input {
+
+        .input-area input {
             flex: 1;
             padding: 14px 20px;
-            border: none;
+            border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 30px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
             font-size: 1em;
             outline: none;
+            transition: all 0.3s;
         }
-        button {
-            padding: 14px 32px;
-            background: #00ff88;
+
+        .input-area input:focus {
+            border-color: #00ff88;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .input-area input::placeholder {
+            color: #666;
+        }
+
+        .input-area button {
+            padding: 14px 36px;
+            background: linear-gradient(135deg, #00ff88, #00bfff);
             border: none;
             border-radius: 30px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s;
-            color: #1a1a2e;
+            transition: all 0.3s;
+            color: #0a0a2a;
+            font-size: 1em;
         }
-        button:hover { transform: scale(1.05); }
-        button:disabled { opacity: 0.5; transform: none; }
-        .status {
-            text-align: center;
-            padding: 5px;
-            font-size: 11px;
-            color: #888;
-            background: rgba(0,0,0,0.3);
+
+        .input-area button:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Скролл */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 10px;
+        }
+
+        /* Мобилка */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .bubble { max-width: 85%; }
+            .messages { padding: 16px; }
         }
     </style>
 </head>
 <body>
-    <div class="chat">
-        <div class="header">🤖 Groq AI Assistant (Llama 3)</div>
-        <div class="messages" id="messages">
-            <div class="message ai">Привет! Я работаю на Groq AI (Llama 3). Напиши сообщение!</div>
+    <div class="app">
+        <!-- Сайдбар -->
+        <div class="sidebar">
+            <div class="logo">
+                <span>✨</span>
+                <span>AI Pro</span>
+            </div>
+            <button class="new-chat-btn" onclick="createNewChat()">
+                <span>➕</span> Новый чат
+            </button>
+            <div>
+                <div class="history-title">📜 ИСТОРИЯ</div>
+                <div class="chat-list" id="chatList"></div>
+            </div>
+            <div class="api-status-card" id="apiStatus">
+                🟢 Groq API: активен
+            </div>
         </div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Напиши сообщение..." onkeypress="if(event.key === 'Enter') sendMessage()">
-            <button id="sendBtn" onclick="sendMessage()">Отправить</button>
+
+        <!-- Основная область -->
+        <div class="main-chat">
+            <div class="chat-header">
+                <h1>🤖 Groq + Gemini AI</h1>
+                <p>Groq (основной) → Google Gemini (резервный) • Автоматическое переключение</p>
+            </div>
+            <div class="messages" id="messages"></div>
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Напишите сообщение..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                <button id="sendBtn" onclick="sendMessage()">Отправить</button>
+            </div>
         </div>
-        <div class="status" id="status">✅ Готов к работе</div>
     </div>
 
     <script>
-        // ТВОЙ API КЛЮЧ
-        const API_KEY = "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";
+        // API ключи
+        const GROQ_API_KEY = "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";
+        const GEMINI_API_KEY = "AIzaSyDja7y_ZAH5uSZY52knGKJFwtJyt3-yF8Q";
         
-        // ИСПРАВЛЕНО: Используем актуальную модель
-        const MODEL = "llama-3.3-70b-versatile";  // или "llama3-8b-8192", "llama-3.3-70b-versatile"
+        const GROQ_MODEL = "mixtral-8x7b-32768";
         
-        const messagesDiv = document.getElementById('messages');
-        const inputField = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const statusDiv = document.getElementById('status');
+        // Хранилище
+        let chats = [];
+        let currentChatId = null;
         
-        let isWaiting = false;
-
-        function setStatus(text, isError = false) {
-            statusDiv.innerHTML = text;
-            statusDiv.style.color = isError ? '#ff8888' : '#888';
-            setTimeout(() => {
-                if (!isError) statusDiv.innerHTML = '✅ Готов к работе';
-                statusDiv.style.color = '#888';
-            }, 3000);
-        }
-
-        async function sendMessage() {
-            if (isWaiting) return;
-            
-            const text = inputField.value.trim();
-            if (!text) return;
-
-            isWaiting = true;
-            inputField.value = '';
-            sendBtn.disabled = true;
-            inputField.disabled = true;
-            
-            addMessage(text, 'user');
-            showTyping();
-            setStatus('🔄 Отправка запроса к Groq...');
-
-            try {
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: MODEL,  // ← Исправлено!
-                        messages: [
-                            {
-                                role: "system",
-                                content: "Ты дружелюбный AI ассистент. Отвечай на русском языке кратко, ясно и по делу. Используй смайлики где уместно."
-                            },
-                            {
-                                role: "user",
-                                content: text
-                            }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 500
-                    })
-                });
-
-                setStatus(`📥 Статус: ${response.status}`);
-
-                if (!response.ok) {
-                    const error = await response.json().catch(() => ({}));
-                    throw new Error(error.error?.message || `HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-                const reply = data.choices[0].message.content;
-                
-                hideTyping();
-                addMessage(reply, 'ai');
-                setStatus('✅ Ответ получен!');
-
-            } catch (error) {
-                console.error('Error:', error);
-                hideTyping();
-                
-                let errorMsg = '';
-                if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
-                    errorMsg = '⚠️ Проблема с соединением.\n\n📌 РЕШЕНИЕ:\n• Используй браузер Brave\n• Или установи расширение "Allow CORS" в Chrome\n• Или залей этот файл на Netlify';
-                } else {
-                    errorMsg = `❌ Ошибка: ${error.message}`;
-                }
-                
-                addMessage(errorMsg, 'ai');
-                setStatus('⚠️ Ошибка', true);
-            } finally {
-                isWaiting = false;
-                sendBtn.disabled = false;
-                inputField.disabled = false;
-                inputField.focus();
+        // Загрузка
+        function loadChats() {
+            const saved = localStorage.getItem('ai_chats_pro');
+            if (saved) {
+                chats = JSON.parse(saved);
+            }
+            if (chats.length === 0) {
+                createNewChat();
+            } else {
+                currentChatId = chats[0].id;
+                renderChatList();
+                loadChat(currentChatId);
             }
         }
-
-        function addMessage(text, type) {
+        
+        function saveChats() {
+            localStorage.setItem('ai_chats_pro', JSON.stringify(chats));
+        }
+        
+        function createNewChat() {
+            const newChat = {
+                id: Date.now(),
+                title: `Чат ${chats.length + 1}`,
+                date: new Date().toLocaleString(),
+                messages: [
+                    { role: 'ai', content: '👋 Привет! Я AI ассистент.\n\nИспользую Groq API (быстрый), а при ошибках автоматически переключаюсь на Google Gemini. Спрашивай что угодно! 🚀', timestamp: new Date().toLocaleTimeString() }
+                ]
+            };
+            chats.unshift(newChat);
+            currentChatId = newChat.id;
+            saveChats();
+            renderChatList();
+            loadChat(currentChatId);
+        }
+        
+        function loadChat(chatId) {
+            const chat = chats.find(c => c.id === chatId);
+            if (!chat) return;
+            currentChatId = chatId;
+            const container = document.getElementById('messages');
+            container.innerHTML = '';
+            chat.messages.forEach(msg => {
+                renderMessage(msg.content, msg.role, msg.timestamp);
+            });
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.id == chatId) item.classList.add('active');
+            });
+        }
+        
+        function renderChatList() {
+            const container = document.getElementById('chatList');
+            container.innerHTML = '';
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
+                div.dataset.id = chat.id;
+                div.onclick = () => loadChat(chat.id);
+                div.innerHTML = `
+                    <div class="chat-title">${chat.title}</div>
+                    <div class="chat-date">${chat.date}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function renderMessage(content, role, timestamp = null) {
+            const container = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            const time = timestamp || new Date().toLocaleTimeString();
+            messageDiv.innerHTML = `
+                <div class="bubble">
+                    ${escapeHtml(content).replace(/\n/g, '<br>')}
+                    <div class="time">${time}</div>
+                </div>
+            `;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function addMessageToCurrentChat(content, role) {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat) {
+                chat.messages.push({ role, content, timestamp: new Date().toLocaleTimeString() });
+                if (chat.messages.length === 2 && role === 'user') {
+                    chat.title = content.substring(0, 25) + (content.length > 25 ? '...' : '');
+                }
+                saveChats();
+                renderChatList();
+                renderMessage(content, role);
+            }
+        }
+        
+        function updateAPIStatus(api, isError = false) {
+            const statusDiv = document.getElementById('apiStatus');
+            if (api === 'groq' && !isError) {
+                statusDiv.innerHTML = '🟢 Groq API: активен';
+                statusDiv.className = 'api-status-card groq';
+            } else if (api === 'groq' && isError) {
+                statusDiv.innerHTML = '⚠️ Groq ошибка → переключение на Gemini';
+                statusDiv.className = 'api-status-card error';
+            } else if (api === 'gemini') {
+                statusDiv.innerHTML = '🟡 Gemini API: резервный активен';
+                statusDiv.className = 'api-status-card gemini';
+            }
+        }
+        
+        // API вызовы
+        async function callGroqAPI(message, history) {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${GROQ_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: GROQ_MODEL,
+                    messages: [
+                        { role: "system", content: "Ты дружелюбный и подробный AI ассистент. Отвечай развернуто на русском языке, используй эмодзи." },
+                        ...history,
+                        { role: "user", content: message }
+                    ],
+                    temperature: 0.8,
+                    max_tokens: 1000
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || `HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+        
+        async function callGeminiAPI(message, history) {
+            let context = "";
+            for (const msg of history.slice(-5)) {
+                context += `${msg.role === 'user' ? '👤 Пользователь' : '🤖 Ассистент'}: ${msg.content}\n`;
+            }
+            
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: `${context}\n👤 Пользователь: ${message}\n\n🤖 Ассистент: `
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.8,
+                        maxOutputTokens: 1000
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || `HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+        
+        // Отправка
+        let isSending = false;
+        
+        async function sendMessage() {
+            if (isSending) return;
+            
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            isSending = true;
+            input.value = '';
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            
+            addMessageToCurrentChat(text, 'user');
+            
+            // Индикатор
+            const container = document.getElementById('messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message ai';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            const chat = chats.find(c => c.id === currentChatId);
+            const history = chat.messages.filter(m => m.role !== 'ai').slice(0, -1).map(m => ({
+                role: m.role === 'user' ? 'user' : 'assistant',
+                content: m.content
+            }));
+            
+            let reply = null;
+            
+            // Пробуем Groq
+            try {
+                updateAPIStatus('groq');
+                reply = await callGroqAPI(text, history);
+                updateAPIStatus('groq');
+            } catch (error) {
+                console.warn('Groq error:', error);
+                updateAPIStatus('groq', true);
+                
+                // Пробуем Gemini
+                try {
+                    reply = await callGeminiAPI(text, history);
+                    updateAPIStatus('gemini');
+                    reply = `💚 *Google Gemini (резервный)*\n\n${reply}`;
+                } catch (geminiError) {
+                    reply = `❌ Оба API временно недоступны.\n\n**Ошибки:**\n• Groq: ${error.message}\n• Gemini: ${geminiError.message}\n\n⏰ Подожди 2-3 минуты и попробуй снова.`;
+                }
+            }
+            
+            // Убираем индикатор
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+            
+            if (reply) {
+                addMessageToCurrentChat(reply, 'ai');
+            }
+            
+            isSending = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+        
+        function escapeHtml(text) {
             const div = document.createElement('div');
-            div.className = `message ${type}`;
-            div.innerText = text;
-            messagesDiv.appendChild(div);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            div.textContent = text;
+            return div.innerHTML;
         }
-
-        let typingElement = null;
-        function showTyping() {
-            typingElement = document.createElement('div');
-            typingElement.className = 'typing';
-            typingElement.innerText = '✍️ AI печатает...';
-            messagesDiv.appendChild(typingElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function hideTyping() {
-            if (typingElement) typingElement.remove();
-            typingElement = null;
-        }
+        
+        // Запуск
+        loadChats();
     </script>
 </body>
 </html>
