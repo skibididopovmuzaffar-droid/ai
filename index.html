@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUZAFFAR AI - Google Gemini</title>
+    <title>MUZAFFAR AI - Google Gemini 2.0</title>
     <style>
         :root {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
+            --bg-primary: #0f0c29;
+            --bg-secondary: #1a1a2e;
             --accent-primary: #ff6b35;
             --accent-secondary: #f7b733;
             --user-msg-bg: linear-gradient(135deg, #ff6b35, #f7b733);
+            --ai-msg-bg: rgba(255,255,255,0.08);
             --border-radius: 28px;
         }
 
@@ -21,58 +22,70 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .chat-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
             border-radius: var(--border-radius);
             height: 90vh;
             display: flex;
             overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .sidebar {
-            width: 280px;
-            background: rgba(0, 0, 0, 0.3);
+            width: 300px;
+            background: rgba(0,0,0,0.4);
             padding: 20px;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(255,255,255,0.08);
         }
 
         .logo {
             font-size: 1.8em;
-            font-weight: bold;
+            font-weight: 800;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            letter-spacing: -0.5px;
         }
 
         .new-chat-btn {
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 14px;
+            border-radius: 14px;
             color: white;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            margin-bottom: 20px;
-            transition: transform 0.2s;
+            margin-bottom: 25px;
+            transition: all 0.2s;
+            font-size: 1em;
         }
 
         .new-chat-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255,107,53,0.3);
+        }
+
+        .chat-history-title {
+            color: #888;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
         }
 
         .chat-list {
@@ -85,10 +98,15 @@
 
         .chat-item {
             background: rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 12px;
             cursor: pointer;
             position: relative;
+            transition: all 0.2s;
+        }
+
+        .chat-item:hover {
+            background: rgba(255,255,255,0.1);
         }
 
         .chat-item.active {
@@ -99,73 +117,91 @@
         .chat-item-title {
             color: white;
             font-size: 0.9em;
+            font-weight: 500;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            padding-right: 25px;
         }
 
         .chat-item-date {
             color: #888;
             font-size: 0.7em;
+            margin-top: 4px;
         }
 
         .delete-chat {
             position: absolute;
-            right: 5px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255,0,0,0.5);
+            background: rgba(255,50,50,0.6);
             border: none;
-            border-radius: 5px;
-            padding: 2px 6px;
+            border-radius: 6px;
+            padding: 4px 8px;
             color: white;
             cursor: pointer;
             font-size: 0.7em;
             opacity: 0;
+            transition: opacity 0.2s;
         }
 
         .chat-item:hover .delete-chat {
             opacity: 1;
         }
 
+        .delete-chat:hover {
+            background: rgba(255,50,50,1);
+        }
+
         .main-chat {
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .chat-header {
-            padding: 20px;
+            padding: 20px 25px;
             background: rgba(0,0,0,0.3);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
         .chat-header h1 {
             color: var(--accent-primary);
-            font-size: 1.5em;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-header p {
+            color: #888;
+            font-size: 0.8em;
+            margin-top: 5px;
         }
 
         .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 25px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
         }
 
         .message {
-            max-width: 70%;
-            padding: 12px 18px;
-            border-radius: 20px;
+            max-width: 75%;
+            padding: 12px 20px;
+            border-radius: 24px;
             animation: fadeIn 0.3s ease;
-            line-height: 1.4;
+            line-height: 1.5;
             white-space: pre-wrap;
             word-wrap: break-word;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -177,80 +213,112 @@
         }
 
         .ai-message {
-            background: rgba(255,255,255,0.1);
-            color: white;
+            background: var(--ai-msg-bg);
+            color: #e0e0e0;
             align-self: flex-start;
             border-bottom-left-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .input-area {
-            padding: 20px;
+            padding: 20px 25px;
             background: rgba(0,0,0,0.3);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255,255,255,0.08);
         }
 
         .input-wrapper {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         input {
             flex: 1;
-            padding: 12px 20px;
+            padding: 14px 22px;
             border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 30px;
-            background: rgba(255,255,255,0.1);
+            border-radius: 40px;
+            background: rgba(255,255,255,0.08);
             color: white;
             font-size: 1em;
             outline: none;
+            transition: all 0.2s;
         }
 
         input:focus {
             border-color: var(--accent-primary);
+            background: rgba(255,255,255,0.12);
+        }
+
+        input::placeholder {
+            color: #666;
         }
 
         button {
-            padding: 12px 25px;
+            padding: 14px 30px;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
-            border-radius: 30px;
+            border-radius: 40px;
             color: white;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
         }
 
-        button:hover {
-            transform: scale(1.05);
+        button:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(255,107,53,0.3);
         }
 
         button:disabled {
             opacity: 0.5;
-            transform: none;
+            cursor: not-allowed;
         }
 
         .typing {
-            background: rgba(255,255,255,0.1);
+            background: var(--ai-msg-bg);
             padding: 10px 18px;
             border-radius: 20px;
             align-self: flex-start;
-            color: #888;
+            color: #aaa;
+            font-size: 0.9em;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .toast {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
             color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 12px 20px;
+            border-radius: 12px;
             z-index: 1000;
+            animation: slideUp 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 3px;
         }
 
         @media (max-width: 768px) {
             .sidebar { display: none; }
-            .message { max-width: 85%; }
+            .message { max-width: 88%; }
+            .chat-header h1 { font-size: 1.2em; }
         }
     </style>
 </head>
@@ -259,12 +327,13 @@
         <div class="sidebar">
             <div class="logo">MUZAFFAR AI</div>
             <button class="new-chat-btn" onclick="createNewChat()">✨ Новый чат</button>
+            <div class="chat-history-title">ИСТОРИЯ ЧАТОВ</div>
             <div class="chat-list" id="chatList"></div>
         </div>
         <div class="main-chat">
             <div class="chat-header">
-                <h1>🤖 MUZAFFAR AI (Google Gemini 1.5 Flash)</h1>
-                <p style="color: #888; font-size: 0.85em;">Мощный AI с русским языком | Работает без CORS на Netlify</p>
+                <h1>🤖 MUZAFFAR AI</h1>
+                <p>Google Gemini 2.0 Flash | Быстрый и умный AI | Работает без CORS</p>
             </div>
             <div class="messages" id="messages"></div>
             <div class="input-area">
@@ -279,8 +348,9 @@
     <script>
         // ===== КОНФИГУРАЦИЯ =====
         const GEMINI_API_KEY = "AIzaSyD_D_ekxQMOnTpUIVO9746G8RRCxvyYAYc";
-        // ИСПРАВЛЕННЫЙ URL - убрали v1beta
-        const GEMINI_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
+        // ИСПОЛЬЗУЕМ РАБОЧУЮ МОДЕЛЬ - GEMINI 2.0 FLASH
+        const MODEL_NAME = "gemini-2.0-flash-exp";
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent`;
         
         let chats = [];
         let currentChatId = null;
@@ -288,11 +358,14 @@
         
         // ===== ЗАГРУЗКА И СОХРАНЕНИЕ =====
         function loadChats() {
-            const saved = localStorage.getItem('muzaffar_gemini_chats');
-            if (saved) {
-                chats = JSON.parse(saved);
-            }
-            if (chats.length === 0) {
+            try {
+                const saved = localStorage.getItem('muzaffar_gemini_v2_chats');
+                if (saved) {
+                    chats = JSON.parse(saved);
+                }
+            } catch(e) { console.error('Load error:', e); }
+            
+            if (!chats || chats.length === 0) {
                 createNewChat();
             } else {
                 currentChatId = chats[0].id;
@@ -302,7 +375,9 @@
         }
         
         function saveChats() {
-            localStorage.setItem('muzaffar_gemini_chats', JSON.stringify(chats));
+            try {
+                localStorage.setItem('muzaffar_gemini_v2_chats', JSON.stringify(chats));
+            } catch(e) { console.error('Save error:', e); }
         }
         
         function createNewChat() {
@@ -311,7 +386,7 @@
                 title: `Новый чат ${chats.length + 1}`,
                 date: new Date().toLocaleString(),
                 messages: [
-                    { role: 'ai', content: 'Привет! Я MUZAFFAR AI на базе Google Gemini 1.5 Flash. Задай любой вопрос на русском! 🚀', timestamp: new Date().toLocaleTimeString() }
+                    { role: 'ai', content: 'Привет! Я MUZAFFAR AI на Google Gemini 2.0. Задай вопрос на русском! 🚀', timestamp: new Date().toLocaleTimeString() }
                 ]
             };
             chats.unshift(newChat);
@@ -392,7 +467,7 @@
             }
         }
         
-        // ===== ОТПРАВКА СООБЩЕНИЯ В GEMINI =====
+        // ===== ОТПРАВКА СООБЩЕНИЯ В GEMINI 2.0 =====
         async function sendMessage() {
             if (isSending) return;
             
@@ -415,42 +490,50 @@
             container.scrollTop = container.scrollHeight;
             
             try {
-                // Формируем контент для Gemini
-                const contents = [
-                    {
-                        role: "user",
-                        parts: [{ text: text }]
-                    }
-                ];
+                const requestBody = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [{ text: text }]
+                        }
+                    ],
+                    generationConfig: {
+                        temperature: 0.8,
+                        maxOutputTokens: 1000,
+                        topP: 0.95
+                    },
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                };
+                
+                console.log('Sending request to:', GEMINI_URL);
+                console.log('Using model:', MODEL_NAME);
                 
                 const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        contents: contents,
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 800,
-                            topP: 0.9,
-                            topK: 40
-                        }
-                    })
+                    body: JSON.stringify(requestBody)
                 });
                 
                 typingDiv.remove();
                 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    console.error('Gemini API Error:', errorData);
+                    console.error('API Error:', errorData);
                     throw new Error(errorData.error?.message || `HTTP ${response.status}`);
                 }
                 
                 const data = await response.json();
+                console.log('Response:', data);
                 
-                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-                    throw new Error('Неожиданный ответ от Gemini API');
+                if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+                    throw new Error('Пустой ответ от API');
                 }
                 
                 const reply = data.candidates[0].content.parts[0].text;
@@ -458,20 +541,46 @@
                 
             } catch (error) {
                 typingDiv.remove();
-                console.error('Gemini Error:', error);
-                let errorMsg = `❌ Ошибка: ${error.message}`;
-                if (error.message.includes('API key') || error.message.includes('quota')) {
-                    errorMsg = '❌ Проблема с API ключом. Проверь ключ Gemini или лимиты.';
+                console.error('Error:', error);
+                
+                let errorMsg = `❌ ${error.message}`;
+                if (error.message.includes('API key') || error.message.includes('quota') || error.message.includes('not found')) {
+                    errorMsg = `❌ Модель ${MODEL_NAME} недоступна. Пробуем gemini-1.5-flash...`;
+                    // Пробуем другую модель
+                    await tryAlternativeModel(text);
+                    return;
                 } else if (error.message.includes('fetch')) {
-                    errorMsg = '❌ Ошибка соединения. Залей этот файл на Netlify - там CORS не будет проблем!';
-                } else if (error.message.includes('not found')) {
-                    errorMsg = '❌ Модель не найдена. Использую gemini-1.5-flash.';
+                    errorMsg = '❌ Ошибка соединения. Залей этот файл на Netlify - там CORS не будет!';
                 }
                 addMessageToChat(errorMsg, 'ai');
             } finally {
                 isSending = false;
                 document.getElementById('sendBtn').disabled = false;
                 input.focus();
+            }
+        }
+        
+        // Запасная модель
+        async function tryAlternativeModel(text) {
+            const altModel = "gemini-1.5-flash";
+            const altUrl = `https://generativelanguage.googleapis.com/v1beta/models/${altModel}:generateContent`;
+            
+            try {
+                const response = await fetch(`${altUrl}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: text }] }],
+                        generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Alternative model failed');
+                const data = await response.json();
+                const reply = data.candidates[0].content.parts[0].text;
+                addMessageToChat(reply, 'ai');
+            } catch (err) {
+                addMessageToChat(`❌ Все модели недоступны. Проверь API ключ в https://aistudio.google.com/`, 'ai');
             }
         }
         
