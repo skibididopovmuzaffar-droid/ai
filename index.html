@@ -2,39 +2,43 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUZAFFAR AI - Ваш персональный ассистент</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MUZAFFAR AI Pro - Ассистент с анализом изображений и подсветкой кода</title>
+    <!-- Подключение highlight.js для подсветки кода -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
     <style>
-        /* ========== НАСТРОЙКИ ДИЗАЙНА (CSS ПЕРЕМЕННЫЕ) ========== */
+        /* ========== ТЕМНАЯ ТЕМА (ЧЁРНЫЙ ФОН, БЕЛЫЙ ТЕКСТ) ========== */
         :root {
-            /* Основные цвета - МОЖНО МЕНЯТЬ ПОД СЕБЯ */
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
-            --bg-sidebar: rgba(0, 0, 0, 0.3);
-            --accent-primary: #ff6b35;
-            --accent-secondary: #f7b733;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #0f0f0f;
+            --bg-sidebar: #141414;
+            --accent-primary: #00ff88;
+            --accent-secondary: #00cc66;
             --text-primary: #ffffff;
             --text-secondary: #aaaaaa;
-            --user-msg-bg: linear-gradient(135deg, #ff6b35, #f7b733);
-            --ai-msg-bg: rgba(255, 255, 255, 0.1);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            --border-radius: 32px;
-            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --user-msg-bg: #00ff88;
+            --user-msg-text: #0a0a0a;
+            --ai-msg-bg: #1a1a1a;
+            --border-color: #2a2a2a;
+            --shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            --border-radius: 24px;
+            --font-family: 'Segoe UI', 'Roboto', 'Monaco', 'Menlo', monospace;
         }
         
-        /* ========== ОСНОВНЫЕ СТИЛИ ========== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: text; /* Разрешаем выделение текста */
         }
         
-        /* Защита от выделения кода */
         body {
             font-family: var(--font-family);
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            background: var(--bg-primary);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -43,18 +47,11 @@
             position: relative;
         }
         
-        /* Блокировка правой кнопки мыши на некоторых элементах */
-        .no-context {
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
         .chat-app {
             width: 100%;
             max-width: 1400px;
             height: 90vh;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
+            background: var(--bg-secondary);
             border-radius: var(--border-radius);
             display: flex;
             overflow: hidden;
@@ -88,7 +85,7 @@
             border: none;
             padding: 14px 20px;
             border-radius: 16px;
-            color: white;
+            color: var(--bg-primary);
             font-weight: bold;
             font-size: 1em;
             cursor: pointer;
@@ -102,7 +99,7 @@
         
         .new-chat-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.3);
         }
         
         .chat-history-title {
@@ -135,7 +132,7 @@
         }
         
         .chat-item.active {
-            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(247, 183, 51, 0.2));
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 102, 0.2));
             border-left: 3px solid var(--accent-primary);
         }
         
@@ -146,6 +143,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            padding-right: 40px;
         }
         
         .chat-item-date {
@@ -235,7 +233,7 @@
         }
         
         .message-bubble {
-            max-width: 70%;
+            max-width: 80%;
             padding: 12px 20px;
             border-radius: 24px;
             line-height: 1.5;
@@ -244,7 +242,7 @@
         
         .user .message-bubble {
             background: var(--user-msg-bg);
-            color: white;
+            color: var(--user-msg-text);
             border-bottom-right-radius: 6px;
         }
         
@@ -252,7 +250,30 @@
             background: var(--ai-msg-bg);
             color: var(--text-primary);
             border-bottom-left-radius: 6px;
-            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Стили для кода в сообщениях */
+        .message-content pre {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border: 1px solid #2a2a2a;
+        }
+        
+        .message-content code {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .message-content pre code {
+            background: none;
+            padding: 0;
         }
         
         /* Кнопки управления сообщением */
@@ -264,9 +285,10 @@
             gap: 8px;
             opacity: 0;
             transition: opacity 0.2s;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.8);
             padding: 5px 10px;
             border-radius: 20px;
+            z-index: 10;
         }
         
         .message-wrapper:hover .message-actions {
@@ -289,22 +311,31 @@
         
         .edit-msg-btn { color: #ffc107; }
         .copy-msg-btn { color: #17a2b8; }
+        .copy-code-btn { color: #00ff88; }
         
-        /* Редактирование сообщения */
-        .edit-input {
-            width: 100%;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid var(--accent-primary);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-family: inherit;
-            resize: vertical;
+        /* Изображения в сообщениях */
+        .message-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .message-image {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .message-image:hover {
+            transform: scale(1.05);
         }
         
         .message-time {
             font-size: 0.7em;
-            margin-top: 5px;
+            margin-top: 8px;
             opacity: 0.7;
         }
         
@@ -315,7 +346,7 @@
             border-radius: 24px;
             display: inline-flex;
             gap: 4px;
-            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
         }
         
         .typing-indicator span {
@@ -325,6 +356,9 @@
             border-radius: 50%;
             animation: typing 1.4s infinite;
         }
+        
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
         
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
@@ -341,20 +375,24 @@
         .input-container {
             display: flex;
             gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
         }
         
-        .voice-btn, .file-btn {
+        .voice-btn, .file-btn, .code-btn {
             padding: 14px 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             border-radius: 30px;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 1.2em;
+            color: white;
         }
         
-        .voice-btn:hover, .file-btn:hover {
+        .voice-btn:hover, .file-btn:hover, .code-btn:hover {
             background: var(--accent-primary);
+            color: var(--bg-primary);
         }
         
         .voice-btn.recording {
@@ -367,22 +405,26 @@
             50% { transform: scale(1.05); }
         }
         
-        .input-area input {
+        .input-container input {
             flex: 1;
             padding: 14px 20px;
             border: 2px solid var(--border-color);
             border-radius: 30px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             color: white;
             font-size: 1em;
             outline: none;
         }
         
-        .input-area input:focus {
+        .input-container input:focus {
             border-color: var(--accent-primary);
         }
         
-        .input-area button {
+        .input-container input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .input-container button {
             padding: 14px 32px;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
@@ -390,36 +432,146 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            color: white;
+            color: var(--bg-primary);
+        }
+        
+        .input-container button:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 2px 10px rgba(0, 255, 136, 0.3);
+        }
+        
+        .input-container button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Превью файлов */
+        .file-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            display: none;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .file-preview img {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 8px;
         }
         
         .share-container {
-            margin-top: 10px;
+            margin-top: 12px;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .share-btn {
             padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: white;
+            transition: all 0.2s;
         }
         
         .share-btn:hover {
             background: var(--accent-primary);
+            color: var(--bg-primary);
         }
         
-        /* Предпросмотр файлов */
-        .file-preview {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
+        /* Модальное окно для написания кода */
+        .modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            border: 1px solid var(--accent-primary);
+        }
+        
+        .modal-header {
+            padding: 15px 20px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            color: var(--accent-primary);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .code-input {
+            width: 100%;
+            min-height: 300px;
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: white;
+            font-family: monospace;
+            padding: 15px;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .code-options {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .code-options select {
+            padding: 8px 12px;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            background: var(--accent-primary);
+            border: none;
+            border-radius: 10px;
+            color: var(--bg-primary);
+            font-weight: bold;
+            cursor: pointer;
         }
         
         /* Всплывающие уведомления */
@@ -427,12 +579,15 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             color: white;
             padding: 12px 20px;
             border-radius: 10px;
             z-index: 1000;
             animation: slideUp 0.3s ease;
+            max-width: 300px;
+            word-wrap: break-word;
+            border-left: 3px solid var(--accent-primary);
         }
         
         @keyframes slideUp {
@@ -440,31 +595,42 @@
             to { transform: translateY(0); opacity: 1; }
         }
         
-        /* Защита кода - водяные знаки */
+        /* Водяной знак */
         .watermark {
             position: fixed;
             bottom: 10px;
             left: 10px;
-            font-size: 10px;
-            color: rgba(255,255,255,0.3);
+            font-size: 9px;
+            color: rgba(255,255,255,0.2);
             pointer-events: none;
             z-index: 9999;
         }
         
         /* Скроллбар */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
-        ::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 4px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 3px; }
         
+        /* Мобильная адаптация */
         @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .message-bubble { max-width: 85%; }
+            .sidebar { 
+                position: fixed;
+                left: -280px;
+                height: 100%;
+                z-index: 100;
+                transition: left 0.3s;
+                width: 280px;
+            }
+            .sidebar.open { left: 0; }
+            .chat-app { border-radius: 20px; }
+            .message-bubble { max-width: 90%; }
+            .input-container button { padding: 12px 20px; }
         }
     </style>
 </head>
 <body>
     <div class="chat-app">
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="logo">MUZAFFAR AI</div>
             <button class="new-chat-btn" onclick="createNewChat()">✨ Новый чат</button>
             <div class="chat-history-title">История чатов</div>
@@ -473,36 +639,71 @@
         
         <div class="main-chat">
             <div class="chat-header">
-                <h2>🤖 MUZAFFAR AI</h2>
-                <p>Ваш персональный ассистент | Мощный и умный AI</p>
+                <h2>🤖 MUZAFFAR AI Pro</h2>
+                <p>Чёрная тема | Подсветка кода | Анализ изображений | Голосовой ввод</p>
             </div>
             <div class="messages-container" id="messagesContainer"></div>
             <div class="input-area">
                 <div class="input-container">
                     <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="Голосовой ввод">🎤</button>
-                    <button class="file-btn" onclick="document.getElementById('fileInput').click()" title="Прикрепить файл">📎</button>
-                    <input type="text" id="userInput" placeholder="Напишите сообщение..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                    <button class="file-btn" onclick="document.getElementById('fileInput').click()" title="Прикрепить изображение">📎</button>
+                    <button class="code-btn" onclick="openCodeModal()" title="Вставить код">{ }</button>
+                    <input type="text" id="userInput" placeholder="Напишите сообщение, вставьте код или опишите изображение..." onkeypress="if(event.key === 'Enter') sendMessage()">
                     <button id="sendBtn" onclick="sendMessage()">Отправить</button>
                 </div>
                 <div class="share-container">
-                    <button class="share-btn" onclick="shareChatAsJSON()">📤 Поделиться чатом (JSON)</button>
                     <button class="share-btn" onclick="exportChatAsText()">📄 Экспорт в TXT</button>
-                    <button class="share-btn" onclick="copyChatLink()">🔗 Скопировать ссылку</button>
+                    <button class="share-btn" onclick="shareChatAsJSON()">📤 Поделиться JSON</button>
+                    <button class="share-btn" onclick="copyChatLink()">🔗 Ссылка на чат</button>
+                    <button class="share-btn" onclick="clearAllChats()">🗑️ Очистить всё</button>
                 </div>
                 <div class="file-preview" id="filePreview"></div>
-                <input type="file" id="fileInput" style="display:none" multiple accept="image/*,.txt,.pdf,.docx" onchange="handleFiles(this.files)">
+                <input type="file" id="fileInput" style="display:none" accept="image/*" multiple onchange="handleFiles(this.files)">
             </div>
         </div>
     </div>
-    <div class="watermark">MUZAFFAR AI | Защищено</div>
+    
+    <!-- Модальное окно для кода -->
+    <div id="codeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📝 Вставка кода</h3>
+                <button class="modal-close" onclick="closeCodeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea class="code-input" id="codeInput" placeholder="Вставьте ваш код здесь..."></textarea>
+                <div class="code-options">
+                    <select id="codeLanguage">
+                        <option value="javascript">JavaScript</option>
+                        <option value="python">Python</option>
+                        <option value="html">HTML</option>
+                        <option value="css">CSS</option>
+                        <option value="json">JSON</option>
+                        <option value="bash">Bash</option>
+                        <option value="sql">SQL</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                        <option value="csharp">C#</option>
+                        <option value="php">PHP</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="go">Go</option>
+                        <option value="rust">Rust</option>
+                    </select>
+                    <button class="modal-btn" onclick="insertCode()">Вставить код в чат</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="watermark">MUZAFFAR AI Pro | Подсветка кода | Чёрная тема</div>
 
     <script>
-        // ========== ЗАЩИТА КОДА ==========
-        // Блокировка некоторых клавиш
+        // ========== ЗАЩИТА ОТ КОПИРОВАНИЯ ==========
         document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'c' && e.target.tagName !== 'INPUT')) {
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
                 e.preventDefault();
-                showToast('🔒 Доступ запрещен');
+                showToast('🔒 Доступ к коду ограничен');
             }
             if (e.key === 'F12') {
                 e.preventDefault();
@@ -510,29 +711,19 @@
             }
         });
         
-        // Блокировка правой кнопки мыши на важных элементах
-        document.querySelectorAll('.chat-app, .message-bubble, .sidebar').forEach(el => {
-            el.addEventListener('contextmenu', (e) => {
-                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                    e.preventDefault();
-                    return false;
-                }
-            });
-        });
-        
         // ========== КОНФИГУРАЦИЯ ==========
         const API_KEY = "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";
-        const MODEL = "llama-3.3-70b-versatile";
+        const VISION_MODEL = "llama-4-scout-17b-16e-instruct";
+        const TEXT_MODEL = "llama-3.3-70b-versatile";
         
         let chats = [];
         let currentChatId = null;
         let isSending = false;
-        let mediaRecorder = null;
-        let audioChunks = [];
+        let currentImages = [];
         
-        // ========== ФУНКЦИИ ЧАТА ==========
+        // ========== ХРАНЕНИЕ ==========
         function loadChats() {
-            const saved = localStorage.getItem('muzaffar_chats');
+            const saved = localStorage.getItem('muzaffar_chats_black');
             if (saved) {
                 chats = JSON.parse(saved);
             }
@@ -546,16 +737,17 @@
         }
         
         function saveChats() {
-            localStorage.setItem('muzaffar_chats', JSON.stringify(chats));
+            localStorage.setItem('muzaffar_chats_black', JSON.stringify(chats));
         }
         
+        // ========== УПРАВЛЕНИЕ ЧАТАМИ ==========
         function createNewChat() {
             const newChat = {
                 id: Date.now(),
                 title: `Новый чат ${chats.length + 1}`,
                 date: new Date().toLocaleString(),
                 messages: [
-                    { id: Date.now(), role: 'ai', content: 'Привет! Я MUZAFFAR AI. Чем могу помочь? 🚀', timestamp: new Date().toLocaleTimeString(), editable: false }
+                    { id: Date.now(), role: 'ai', content: 'Привет! Я **MUZAFFAR AI Pro**.\n\nВот что я умею:\n\n• 📝 **Анализ изображений** - загрузи фото и спроси что на нём\n• 💻 **Подсветка кода** - вставляй код, я его подсвечу\n• 🎤 **Голосовой ввод** - говори, я распознаю\n• 📤 **Экспорт чатов** - сохраняй диалоги\n\nПопробуй отправить код или загрузить изображение! 🚀', timestamp: new Date().toLocaleTimeString() }
                 ]
             };
             chats.unshift(newChat);
@@ -567,7 +759,7 @@
         }
         
         function deleteChat(chatId, event) {
-            event.stopPropagation();
+            if (event) event.stopPropagation();
             if (chats.length === 1) {
                 showToast('❌ Нельзя удалить последний чат');
                 return;
@@ -582,6 +774,14 @@
             showToast('🗑️ Чат удален');
         }
         
+        function clearAllChats() {
+            if (confirm('⚠️ Вы уверены, что хотите удалить ВСЕ чаты? Это действие нельзя отменить.')) {
+                chats = [];
+                createNewChat();
+                showToast('✅ Все чаты удалены');
+            }
+        }
+        
         function loadChat(chatId) {
             const chat = chats.find(c => c.id === chatId);
             if (!chat) return;
@@ -589,7 +789,7 @@
             const container = document.getElementById('messagesContainer');
             container.innerHTML = '';
             chat.messages.forEach(msg => {
-                renderMessage(msg.content, msg.role, msg.timestamp, msg.id);
+                renderMessage(msg);
             });
             document.querySelectorAll('.chat-item').forEach(item => {
                 item.classList.remove('active');
@@ -597,26 +797,80 @@
             });
         }
         
-        function renderMessage(content, role, timestamp = null, msgId = null) {
+        // ========== ОТОБРАЖЕНИЕ СООБЩЕНИЙ С ПОДСВЕТКОЙ КОДА ==========
+        function renderMessage(msg) {
             const container = document.getElementById('messagesContainer');
             const wrapper = document.createElement('div');
-            wrapper.className = `message-wrapper ${role}`;
-            const time = timestamp || new Date().toLocaleTimeString();
-            const id = msgId || Date.now();
+            wrapper.className = `message-wrapper ${msg.role}`;
+            
+            let imagesHtml = '';
+            if (msg.images && msg.images.length > 0) {
+                imagesHtml = `<div class="message-images">`;
+                msg.images.forEach(img => {
+                    imagesHtml += `<img src="${img}" class="message-image" onclick="window.open('${img}', '_blank')">`;
+                });
+                imagesHtml += `</div>`;
+            }
+            
+            // Обработка HTML и подсветка кода
+            let contentHtml = '';
+            if (msg.content) {
+                // Подсветка блоков кода
+                let processedContent = escapeHtml(msg.content);
+                processedContent = processedContent.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                    return `<pre><code class="language-${lang || 'javascript'}">${escapeHtml(code)}</code></pre>`;
+                });
+                // Подсветка инлайн-кода
+                processedContent = processedContent.replace(/`([^`]+)`/g, '<code>$1</code>');
+                // Обработка жирного текста
+                processedContent = processedContent.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                processedContent = processedContent.replace(/\n/g, '<br>');
+                contentHtml = `<div class="message-content">${processedContent}</div>`;
+            }
             
             wrapper.innerHTML = `
                 <div class="message-bubble">
-                    <div class="message-content">${escapeHtml(content)}</div>
-                    <div class="message-time">${time}</div>
+                    ${imagesHtml}
+                    ${contentHtml}
+                    <div class="message-time">${msg.timestamp}</div>
                 </div>
                 <div class="message-actions">
-                    ${role === 'user' ? `<button class="edit-msg-btn" onclick="editMessage(${id})">✏️</button>` : ''}
-                    <button class="copy-msg-btn" onclick="copyMessage('${escapeHtml(content).replace(/'/g, "\\'")}')">📋</button>
+                    ${msg.role === 'user' ? `<button class="edit-msg-btn" onclick="editMessage(${msg.id})">✏️</button>` : ''}
+                    <button class="copy-msg-btn" onclick="copyMessage('${escapeHtml(msg.content || '').replace(/'/g, "\\'")}')">📋</button>
+                    <button class="copy-code-btn" onclick="extractAndCopyCode(${msg.id})">💻</button>
                 </div>
             `;
-            wrapper.querySelector('.message-bubble').dataset.msgId = id;
             container.appendChild(wrapper);
+            
+            // Подсветка кода
+            wrapper.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+            
             container.scrollTop = container.scrollHeight;
+        }
+        
+        function extractAndCopyCode(msgId) {
+            const chat = chats.find(c => c.id === currentChatId);
+            const msg = chat.messages.find(m => m.id === msgId);
+            if (msg && msg.content) {
+                const codeBlocks = msg.content.match(/```(\w*)\n([\s\S]*?)```/g);
+                if (codeBlocks) {
+                    let allCode = '';
+                    codeBlocks.forEach(block => {
+                        const code = block.replace(/```\w*\n/, '').replace(/```$/, '');
+                        allCode += code + '\n\n';
+                    });
+                    if (allCode) {
+                        navigator.clipboard.writeText(allCode);
+                        showToast('📋 Код скопирован');
+                    } else {
+                        showToast('❌ Нет кода в сообщении');
+                    }
+                } else {
+                    showToast('❌ Нет кода в сообщении');
+                }
+            }
         }
         
         function editMessage(msgId) {
@@ -629,7 +883,6 @@
                 msg.content = newContent;
                 saveChats();
                 loadChat(currentChatId);
-                // Автоматически отправляем новую версию
                 sendMessageWithText(newContent);
             }
         }
@@ -639,23 +892,23 @@
             showToast('📋 Сообщение скопировано');
         }
         
-        function addMessageToCurrentChat(content, role, msgId = null) {
+        function addMessageToCurrentChat(content, role, images = null) {
             const chat = chats.find(c => c.id === currentChatId);
             if (chat) {
                 const newMsg = {
-                    id: msgId || Date.now(),
+                    id: Date.now(),
                     role: role,
                     content: content,
-                    timestamp: new Date().toLocaleTimeString(),
-                    editable: role === 'user'
+                    images: images,
+                    timestamp: new Date().toLocaleTimeString()
                 };
                 chat.messages.push(newMsg);
-                if (chat.messages.length === 2 && role === 'user') {
+                if (chat.messages.length === 2 && role === 'user' && content) {
                     chat.title = content.substring(0, 30) + (content.length > 30 ? '...' : '');
                 }
                 saveChats();
                 renderChatList();
-                renderMessage(content, role, newMsg.timestamp, newMsg.id);
+                renderMessage(newMsg);
             }
         }
         
@@ -663,24 +916,25 @@
         async function sendMessage() {
             const input = document.getElementById('userInput');
             const text = input.value.trim();
-            if (!text || isSending) return;
-            await sendMessageWithText(text);
-            input.value = '';
+            
+            if (!text && currentImages.length === 0) return;
+            if (isSending) return;
+            
+            if (currentImages.length > 0) {
+                await sendMessageWithImages(text);
+            } else if (text) {
+                await sendMessageWithText(text);
+            }
         }
         
         async function sendMessageWithText(text) {
             if (isSending) return;
             isSending = true;
             
-            addMessageToCurrentChat(text, 'user');
+            addMessageToCurrentChat(text, 'user', null);
             
             const container = document.getElementById('messagesContainer');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message-wrapper ai';
-            typingDiv.id = 'typing-indicator';
-            typingDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
-            container.appendChild(typingDiv);
-            container.scrollTop = container.scrollHeight;
+            const typingDiv = createTypingIndicator(container);
             
             try {
                 const chat = chats.find(c => c.id === currentChatId);
@@ -691,36 +945,166 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: MODEL,
+                        model: TEXT_MODEL,
                         messages: [
-                            { role: "system", content: "Ты MUZAFFAR AI - дружелюбный, умный ассистент. Отвечай развернуто на русском языке. Будь полезным." },
+                            { role: "system", content: "Ты MUZAFFAR AI Pro - дружелюбный, умный ассистент. Отвечай развернуто на русском языке. Если видишь код - объясняй его. Будь полезным." },
                             ...chat.messages.filter(m => m.role !== 'ai').map(m => ({
                                 role: m.role === 'user' ? 'user' : 'assistant',
                                 content: m.content
                             }))
                         ],
                         temperature: 0.8,
-                        max_tokens: 1000
+                        max_tokens: 1500
                     })
                 });
                 
                 typingDiv.remove();
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    const error = await response.json();
+                    throw new Error(error.error?.message || `HTTP ${response.status}`);
                 }
                 
                 const data = await response.json();
                 const reply = data.choices[0].message.content;
-                addMessageToCurrentChat(reply, 'ai');
+                addMessageToCurrentChat(reply, 'ai', null);
                 
             } catch (error) {
                 typingDiv.remove();
-                addMessageToCurrentChat(`❌ Ошибка: ${error.message}`, 'ai');
+                console.error('Error:', error);
+                addMessageToCurrentChat(`❌ Ошибка: ${error.message}`, 'ai', null);
             } finally {
                 isSending = false;
                 document.getElementById('sendBtn').disabled = false;
+                document.getElementById('userInput').focus();
             }
+        }
+        
+        async function sendMessageWithImages(text) {
+            if (isSending) return;
+            isSending = true;
+            
+            const userText = text || "Опиши это изображение подробно";
+            const imagesToSend = [...currentImages];
+            
+            const chat = chats.find(c => c.id === currentChatId);
+            chat.messages.push({
+                id: Date.now(),
+                role: 'user',
+                content: userText,
+                images: imagesToSend,
+                timestamp: new Date().toLocaleTimeString()
+            });
+            saveChats();
+            renderMessage(chat.messages[chat.messages.length - 1]);
+            
+            document.getElementById('filePreview').innerHTML = '';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('userInput').value = '';
+            currentImages = [];
+            
+            const container = document.getElementById('messagesContainer');
+            const typingDiv = createTypingIndicator(container);
+            
+            try {
+                const contentArray = [];
+                for (const img of imagesToSend) {
+                    contentArray.push({
+                        type: "image_url",
+                        image_url: { url: img }
+                    });
+                }
+                contentArray.push({
+                    type: "text",
+                    text: userText + " Опиши подробно на русском языке."
+                });
+                
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: VISION_MODEL,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "Ты MUZAFFAR AI Pro - ассистент с анализом изображений. Описывай изображения подробно, отвечай на русском языке."
+                            },
+                            {
+                                role: "user",
+                                content: contentArray
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 800
+                    })
+                });
+                
+                typingDiv.remove();
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || `HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                addMessageToCurrentChat(reply, 'ai', null);
+                
+            } catch (error) {
+                typingDiv.remove();
+                addMessageToCurrentChat(`❌ Ошибка анализа: ${error.message}`, 'ai', null);
+            } finally {
+                isSending = false;
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('userInput').focus();
+            }
+        }
+        
+        // ========== КОД В ЧАТЕ ==========
+        function openCodeModal() {
+            document.getElementById('codeModal').style.display = 'flex';
+            document.getElementById('codeInput').value = '';
+        }
+        
+        function closeCodeModal() {
+            document.getElementById('codeModal').style.display = 'none';
+        }
+        
+        function insertCode() {
+            const code = document.getElementById('codeInput').value.trim();
+            const language = document.getElementById('codeLanguage').value;
+            
+            if (!code) {
+                showToast('⚠️ Введите код');
+                return;
+            }
+            
+            const formattedCode = `\`\`\`${language}\n${code}\n\`\`\``;
+            const input = document.getElementById('userInput');
+            const currentText = input.value;
+            
+            if (currentText) {
+                input.value = currentText + '\n\n' + formattedCode;
+            } else {
+                input.value = formattedCode;
+            }
+            
+            closeCodeModal();
+            showToast('💻 Код добавлен в сообщение');
+            document.getElementById('userInput').focus();
+        }
+        
+        function createTypingIndicator(container) {
+            const div = document.createElement('div');
+            div.className = 'message-wrapper ai';
+            div.id = 'typing-indicator';
+            div.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span> Печатает...</div>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return div;
         }
         
         // ========== ГОЛОСОВОЙ ВВОД ==========
@@ -728,8 +1112,8 @@
         let isRecording = false;
         
         function toggleVoiceInput() {
-            if (!('webkitSpeechRecognition' in window)) {
-                showToast('❌ Голосовой ввод не поддерживается в этом браузере');
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showToast('❌ Голосовой ввод не поддерживается');
                 return;
             }
             
@@ -738,7 +1122,8 @@
                 return;
             }
             
-            recognition = new webkitSpeechRecognition();
+            const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+            recognition = new SpeechRecognition();
             recognition.lang = 'ru-RU';
             recognition.continuous = false;
             recognition.interimResults = false;
@@ -752,20 +1137,16 @@
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
                 document.getElementById('userInput').value = text;
-                showToast(`📝 Распознано: ${text}`);
+                showToast(`📝 Распознано: ${text.substring(0, 50)}`);
                 stopVoiceInput();
             };
             
-            recognition.onerror = (event) => {
-                console.error('Voice error:', event.error);
+            recognition.onerror = () => {
                 showToast('❌ Ошибка распознавания');
                 stopVoiceInput();
             };
             
-            recognition.onend = () => {
-                stopVoiceInput();
-            };
-            
+            recognition.onend = () => stopVoiceInput();
             recognition.start();
         }
         
@@ -775,38 +1156,43 @@
                 recognition = null;
             }
             isRecording = false;
-            document.getElementById('voiceBtn')?.classList.remove('recording');
+            const voiceBtn = document.getElementById('voiceBtn');
+            if (voiceBtn) voiceBtn.classList.remove('recording');
         }
         
-        // ========== ЗАГРУЗКА ФАЙЛОВ ==========
+        // ========== ЗАГРУЗКА ИЗОБРАЖЕНИЙ ==========
         function handleFiles(files) {
             const preview = document.getElementById('filePreview');
             preview.innerHTML = '';
-            preview.style.display = 'block';
+            preview.style.display = 'flex';
+            currentImages = [];
             
             Array.from(files).forEach(file => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        preview.innerHTML += `<img src="${e.target.result}" style="max-width: 100px; max-height: 100px; margin: 5px; border-radius: 10px;">`;
+                        currentImages.push(e.target.result);
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.title = file.name;
+                        preview.appendChild(img);
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    preview.innerHTML += `<div>📄 ${file.name}</div>`;
+                    showToast('⚠️ Поддерживаются только изображения');
                 }
             });
-            
-            showToast(`📎 Загружено ${files.length} файлов`);
         }
         
-        // ========== ЭКСПОРТ И ШАРИНГ ==========
+        // ========== ЭКСПОРТ ==========
         function exportChatAsText() {
             const chat = chats.find(c => c.id === currentChatId);
-            let text = `MUZAFFAR AI - Чат от ${chat.date}\n\n`;
+            let text = `MUZAFFAR AI Pro - Экспорт чата\nДата: ${chat.date}\n\n`;
             chat.messages.forEach(msg => {
-                text += `${msg.role === 'user' ? '👤 Пользователь' : '🤖 MUZAFFAR AI'} (${msg.timestamp}):\n${msg.content}\n\n---\n\n`;
+                const role = msg.role === 'user' ? 'Пользователь' : 'MUZAFFAR AI';
+                text += `[${role}] ${msg.timestamp}:\n${msg.content}\n\n---\n\n`;
             });
-            const blob = new Blob([text], { type: 'text/plain' });
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -826,13 +1212,12 @@
             a.download = `muzaffar_chat_${Date.now()}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            showToast('📤 JSON чата сохранен');
+            showToast('📤 JSON сохранен');
         }
         
         function copyChatLink() {
-            const url = window.location.href;
-            navigator.clipboard.writeText(url);
-            showToast('🔗 Ссылка на чат скопирована');
+            navigator.clipboard.writeText(window.location.href);
+            showToast('🔗 Ссылка скопирована');
         }
         
         function renderChatList() {
@@ -853,6 +1238,7 @@
         }
         
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
@@ -866,20 +1252,25 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        // Закрытие модалки по клику вне
+        window.onclick = (event) => {
+            const modal = document.getElementById('codeModal');
+            if (event.target === modal) closeCodeModal();
+        };
+        
+        // Инициализация
         loadChats();
         
-        // Блокировка F12 и других клавиш разработчика
+        // Защита изображений
         document.addEventListener('contextmenu', (e) => {
-            if (!e.target.closest('input, textarea, [contenteditable="true"]')) {
+            if (e.target.tagName === 'IMG') {
                 e.preventDefault();
+                showToast('🔒 Сохранение изображений отключено');
                 return false;
             }
         });
         
-        // Предупреждение о защите
-        console.log('%c🔒 MUZAFFAR AI - Все права защищены', 'color: #ff6b35; font-size: 16px; font-weight: bold;');
-        console.log('%cКод защищен от копирования', 'color: #888;');
+        console.log('%c⚡ MUZAFFAR AI Pro | Чёрная тема | Подсветка кода', 'color: #00ff88; font-size: 14px; font-weight: bold;');
     </script>
 </body>
 </html>
